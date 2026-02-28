@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kira mı Satın Alma mı? | Türkiye Hesaplayıcı</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <h1 id="title">Kira mı Satın Alma mı? (Türkiye)</h1>
+        <p id="subtitle">30 yıllık Monte Carlo simülasyonu ile karşılaştırma</p>
+      </div>
+      <div class="lang-wrap">
+        <label for="langSelect" id="langLabel">Dil</label>
+        <select id="langSelect">
+          <option value="tr">TR</option>
+          <option value="en">EN</option>
+        </select>
+      </div>
+    </header>
+
+    <main class="grid">
+      <section class="card inputs">
+        <h2 id="inputTitle">Girdiler</h2>
+        <div class="grid-2">
+          <label>
+            <span id="cityLabel">İl / İlçe</span>
+            <select id="districtSelect"></select>
+          </label>
+          <label>
+            <span id="homePriceLabel">Konut fiyatı (₺)</span>
+            <input id="homePrice" type="number" min="0" step="10000" />
+          </label>
+          <label>
+            <span id="rentLabel">Aylık kira (₺)</span>
+            <input id="monthlyRent" type="number" min="0" step="500" />
+          </label>
+          <label>
+            <span id="downPaymentLabel">Peşinat (%)</span>
+            <input id="downPaymentPct" type="number" min="0" max="100" step="1" value="25" />
+          </label>
+          <label>
+            <span id="mortgageRateLabel">Konut kredisi faiz (%)</span>
+            <input id="mortgageRate" type="number" min="0" step="0.1" value="3.2" />
+          </label>
+          <label>
+            <span id="maturityLabel">Vade (yıl)</span>
+            <select id="loanYears">
+              <option>10</option>
+              <option selected>15</option>
+              <option>20</option>
+            </select>
+          </label>
+          <label>
+            <span id="maintenanceLabel">Aylık bakım + aidat (₺)</span>
+            <input id="maintenance" type="number" min="0" step="250" />
+          </label>
+          <label>
+            <span id="propertyTaxLabel">Emlak vergisi (%)</span>
+            <input id="propertyTaxPct" type="number" min="0" step="0.01" />
+          </label>
+          <label>
+            <span id="rentIncLabel">Beklenen yıllık kira artışı (%)</span>
+            <input id="rentIncrease" type="number" min="0" step="0.5" value="30" />
+          </label>
+          <label>
+            <span id="appreciationLabel">Beklenen konut değer artışı (%)</span>
+            <input id="homeAppreciation" type="number" min="0" step="0.5" value="25" />
+          </label>
+          <label>
+            <span id="investLabel">Beklenen yatırım getirisi (%)</span>
+            <input id="investmentReturn" type="number" step="0.5" value="12" />
+          </label>
+          <label>
+            <span id="inflationLabel">Enflasyon (%)</span>
+            <input id="inflation" type="number" min="0" step="0.5" value="30" />
+          </label>
+        </div>
+        <div class="grid-2 extra-options">
+          <label>
+            <span id="simCountLabel">Simülasyon yolu</span>
+            <input id="simCount" type="number" min="10000" step="1000" value="10000" />
+          </label>
+          <label>
+            <span id="currencyLabel">Gösterim birimi</span>
+            <select id="valueMode">
+              <option value="nominal">Nominal TRY</option>
+              <option value="real">Reel TRY</option>
+              <option value="usd">USD Referans</option>
+            </select>
+          </label>
+        </div>
+        <div class="source-banner" id="sourceBanner"></div>
+        <button id="runBtn">Simülasyonu Çalıştır</button>
+      </section>
+
+      <section class="card outputs">
+        <h2 id="resultsTitle">Sonuçlar</h2>
+        <div class="summary" id="summary"></div>
+        <div class="chart-wrap">
+          <h3 id="nwChartTitle">Net Varlık Zaman Serisi</h3>
+          <canvas id="netWorthChart"></canvas>
+        </div>
+        <div class="chart-wrap">
+          <h3 id="distChartTitle">10/20/30. Yıl Sonuç Dağılımı (Buy - Rent)</h3>
+          <canvas id="distributionChart"></canvas>
+        </div>
+      </section>
+    </main>
+
+    <footer class="disclaimer" id="disclaimer">
+      Bu araç yalnızca bilgilendirme amaçlıdır; yatırım veya finansal danışmanlık değildir.
+      Veriler TÜİK, Endeksa, Sahibinden ve TCMB göstergelerinin aylık önbelleklenmiş yaklaşık değerleriyle
+      oluşturulmuştur; canlı API olmadığında bu değerler kullanılır.
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
