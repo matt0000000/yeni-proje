@@ -4,6 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kira mı Satın Alma mı? | Türkiye Hesaplayıcı</title>
+
+    <!-- Emoji favicon — no extra file needed -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>" />
+
+    <!-- Open Graph -->
+    <meta property="og:title"       content="Kira mı Satın Alma mı? | Türkiye" />
+    <meta property="og:description" content="30 yıllık Monte Carlo simülasyonu ile Türkiye'de kira vs satın alma karşılaştırması." />
+    <meta property="og:type"        content="website" />
+
     <link rel="stylesheet" href="styles.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
@@ -13,12 +22,15 @@
         <h1 id="title">Kira mı Satın Alma mı? (Türkiye)</h1>
         <p id="subtitle">30 yıllık Monte Carlo simülasyonu ile karşılaştırma</p>
       </div>
-      <div class="lang-wrap">
-        <label for="langSelect" id="langLabel">Dil</label>
-        <select id="langSelect">
-          <option value="tr">TR</option>
-          <option value="en">EN</option>
-        </select>
+      <div class="header-controls">
+        <button id="darkToggle" class="icon-btn">Karanlık Mod</button>
+        <div class="lang-wrap">
+          <label for="langSelect" id="langLabel">Dil</label>
+          <select id="langSelect">
+            <option value="tr">TR</option>
+            <option value="en">EN</option>
+          </select>
+        </div>
       </div>
     </header>
 
@@ -43,7 +55,7 @@
             <input id="downPaymentPct" type="number" min="0" max="100" step="1" value="25" />
           </label>
           <label>
-            <span id="mortgageRateLabel">Konut kredisi faiz (%)</span>
+            <span id="mortgageRateLabel">Konut kredisi faiz (% yıllık)</span>
             <input id="mortgageRate" type="number" min="0" step="0.1" value="3.2" />
           </label>
           <label>
@@ -71,18 +83,23 @@
             <input id="homeAppreciation" type="number" min="0" step="0.5" value="25" />
           </label>
           <label>
-            <span id="investLabel">Beklenen yatırım getirisi (%)</span>
+            <span id="investLabel">Beklenen yatırım getirisi – reel (%)</span>
             <input id="investmentReturn" type="number" step="0.5" value="12" />
           </label>
           <label>
             <span id="inflationLabel">Enflasyon (%)</span>
             <input id="inflation" type="number" min="0" step="0.5" value="30" />
           </label>
+          <label>
+            <span id="usdTryLabel">USD/TRY kuru</span>
+            <input id="usdTry" type="number" min="1" step="1" value="34" />
+          </label>
         </div>
+
         <div class="grid-2 extra-options">
           <label>
             <span id="simCountLabel">Simülasyon yolu</span>
-            <input id="simCount" type="number" min="10000" step="1000" value="10000" />
+            <input id="simCount" type="number" min="1000" step="1000" value="10000" />
           </label>
           <label>
             <span id="currencyLabel">Gösterim birimi</span>
@@ -93,20 +110,32 @@
             </select>
           </label>
         </div>
+
         <div class="source-banner" id="sourceBanner"></div>
-        <button id="runBtn">Simülasyonu Çalıştır</button>
+
+        <div class="button-row">
+          <button id="runBtn">Simülasyonu Çalıştır</button>
+          <button id="exportBtn" class="secondary-btn">CSV İndir</button>
+        </div>
       </section>
 
       <section class="card outputs">
         <h2 id="resultsTitle">Sonuçlar</h2>
         <div class="summary" id="summary"></div>
+
         <div class="chart-wrap">
-          <h3 id="nwChartTitle">Net Varlık Zaman Serisi</h3>
+          <h3 id="nwChartTitle">Net Varlık Zaman Serisi (Ortanca ± P10/P90)</h3>
           <canvas id="netWorthChart"></canvas>
         </div>
+
         <div class="chart-wrap">
-          <h3 id="distChartTitle">10/20/30. Yıl Sonuç Dağılımı (Buy - Rent)</h3>
+          <h3 id="distChartTitle">10/20/30. Yıl Sonuç Dağılımı (Satın Al − Kirala)</h3>
           <canvas id="distributionChart"></canvas>
+        </div>
+
+        <div class="chart-wrap">
+          <h3 id="sensChartTitle">Duyarlılık Analizi — 30. Yıl Ortanca Fark</h3>
+          <canvas id="sensitivityChart"></canvas>
         </div>
       </section>
     </main>
