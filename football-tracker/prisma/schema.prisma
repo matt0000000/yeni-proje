@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model League {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  country   String
+  logo      String
+  clubs     Club[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Club {
+  id        String   @id @default(cuid())
+  slug      String
+  name      String
+  shortName String
+  logo      String
+  stadium   String?
+  founded   Int?
+  leagueId  String
+  league    League   @relation(fields: [leagueId], references: [id])
+  players   Player[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([slug, leagueId])
+}
+
+model Player {
+  id              String         @id @default(cuid())
+  slug            String         @unique
+  name            String
+  fullName        String?
+  nationality     String
+  nationalityCode String
+  position        String
+  positionGroup   String
+  age             Int
+  dateOfBirth     DateTime?
+  height          String?
+  foot            String?
+  currentValue    Float
+  valueTrend      String         @default("stable")
+  contractExpiry  String?
+  shirtNumber     Int?
+  clubId          String
+  club            Club           @relation(fields: [clubId], references: [id])
+  valueHistory    ValueHistory[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model ValueHistory {
+  id       String   @id @default(cuid())
+  playerId String
+  player   Player   @relation(fields: [playerId], references: [id])
+  value    Float
+  date     DateTime
+}
