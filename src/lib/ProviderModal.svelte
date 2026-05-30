@@ -74,10 +74,7 @@
 					<div class="no-providers">
 						<span>😔</span>
 						<p>Bu içerik şu an Türkiye'de hiçbir platformda mevcut değil.</p>
-						{#if item.providers?.link}
-							<a href={item.providers.link} target="_blank" rel="noopener noreferrer">TMDB'de gör →</a>
-						{/if}
-					</div>
+</div>
 				{:else}
 					{#each sections as { key, label }}
 						{#if item.providers[key]?.length}
@@ -98,12 +95,7 @@
 							</div>
 						{/if}
 					{/each}
-					{#if item.providers?.link}
-						<a class="justwatch-link" href={item.providers.link} target="_blank" rel="noopener noreferrer">
-							JustWatch'ta görüntüle →
-						</a>
 					{/if}
-				{/if}
 			</div>
 		</div>
 	</div>
