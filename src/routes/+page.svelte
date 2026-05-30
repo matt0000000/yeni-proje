@@ -27,6 +27,12 @@
 		debounceTimer = setTimeout(() => search(query), 350);
 	}
 
+	function clearSearch() {
+		query = '';
+		results = [];
+		clearTimeout(debounceTimer);
+	}
+
 	async function openProviders(item) {
 		selected = { ...item, providers: null, detail: null, loadingProviders: true };
 		const res = await fetch(`/api/providers?id=${item.id}&type=${item.media_type}`);
@@ -56,6 +62,12 @@
 			/>
 			{#if loading}
 				<span class="spinner"></span>
+			{:else if query}
+				<button class="clear-btn" onclick={clearSearch} aria-label="Temizle">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+						<path d="M18 6 6 18M6 6l12 12"/>
+					</svg>
+				</button>
 			{/if}
 		</div>
 
@@ -171,6 +183,31 @@
 	.search::placeholder { color: #555; }
 
 	.search::-webkit-search-cancel-button { display: none; }
+
+	.clear-btn {
+		position: absolute;
+		right: 0.85rem;
+		background: none;
+		border: none;
+		cursor: pointer;
+		padding: 0.25rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: #555;
+		border-radius: 50%;
+		transition: color 0.15s, background 0.15s;
+	}
+
+	.clear-btn:hover {
+		color: #ccc;
+		background: #2a2a33;
+	}
+
+	.clear-btn svg {
+		width: 16px;
+		height: 16px;
+	}
 
 	.spinner {
 		position: absolute;
