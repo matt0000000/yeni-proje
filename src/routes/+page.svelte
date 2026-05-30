@@ -1,13 +1,14 @@
 <script>
-	import { tick } from 'svelte';
 	import ProviderModal from '$lib/ProviderModal.svelte';
-	import ResultCard from '$lib/ResultCard.svelte';
 
 	let query = $state('');
 	let results = $state([]);
 	let loading = $state(false);
 	let selected = $state(null);
 	let debounceTimer;
+
+	const hasResults = $derived(results.length > 0);
+	const searched = $derived(query.trim().length > 0);
 
 	async function search(q) {
 		if (!q.trim()) { results = []; return; }
@@ -32,53 +33,62 @@
 		const data = await res.json();
 		selected = { ...selected, providers: data.tr, detail: data.detail, loadingProviders: false };
 	}
+
+	const IMG = 'https://image.tmdb.org/t/p/w92';
 </script>
 
-<div class="page">
-	<header>
-		<div class="logo">
-			<span class="logo-icon">▶</span>
-			<div>
-				<h1>Nerede İzlenir?</h1>
-				<p>Türkiye'deki streaming platformlarını keşfet</p>
-			</div>
-		</div>
+<div class="page" class:has-results={hasResults || searched}>
+	<div class="center-wrap">
+		<h1 class="logo">nerede<span>izlenir</span></h1>
 
 		<div class="search-wrap">
+			<svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+				<circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+			</svg>
 			<input
 				class="search"
 				type="search"
-				placeholder="Film veya dizi ara… (örn: Breaking Bad, Inception)"
+				placeholder="Film veya dizi ara…"
 				bind:value={query}
 				oninput={onInput}
 				autocomplete="off"
+				spellcheck="false"
 			/>
 			{#if loading}
 				<span class="spinner"></span>
 			{/if}
 		</div>
-	</header>
 
-	<main>
-		{#if results.length === 0 && !loading && !query.trim()}
-			<div class="empty-state">
-				<span>🎬</span>
-				<p>Film veya dizi adı yazarak Türkiye'deki yayın platformlarını öğren.</p>
-				<p class="sub">Netflix, Disney+, Gain, BluTV, Amazon Prime ve daha fazlası</p>
-			</div>
-		{:else if results.length === 0 && !loading && query.trim()}
-			<div class="empty-state">
-				<span>🔍</span>
-				<p>"{query}" için sonuç bulunamadı.</p>
-			</div>
-		{:else}
-			<div class="grid">
+		{#if hasResults}
+			<ul class="results">
 				{#each results as item (item.id + item.media_type)}
-					<ResultCard {item} onclick={() => openProviders(item)} />
+					{@const title = item.title ?? item.name ?? ''}
+					{@const year = (item.release_date ?? item.first_air_date ?? '').slice(0, 4)}
+					{@const poster = item.poster_path ? IMG + item.poster_path : null}
+					<li>
+						<button class="result-row" onclick={() => openProviders(item)}>
+							{#if poster}
+								<img src={poster} alt="" class="thumb" />
+							{:else}
+								<div class="thumb thumb-empty">🎬</div>
+							{/if}
+							<div class="result-text">
+								<span class="result-title">{title}</span>
+								<span class="result-meta">
+									{#if year}{year} · {/if}{item.media_type === 'movie' ? 'Film' : 'Dizi'}
+								</span>
+							</div>
+							<svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="m9 18 6-6-6-6"/>
+							</svg>
+						</button>
+					</li>
 				{/each}
-			</div>
+			</ul>
+		{:else if searched && !loading}
+			<p class="empty">"{query}" için sonuç bulunamadı.</p>
 		{/if}
-	</main>
+	</div>
 </div>
 
 {#if selected}
@@ -87,116 +97,178 @@
 
 <style>
 	.page {
-		max-width: 1200px;
-		margin: 0 auto;
-		padding: 2rem 1.5rem;
+		min-height: 100vh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 2rem 1rem;
+		transition: align-items 0.3s;
 	}
 
-	header {
-		margin-bottom: 2.5rem;
+	.page.has-results {
+		align-items: flex-start;
+		padding-top: 4rem;
+	}
+
+	.center-wrap {
+		width: 100%;
+		max-width: 580px;
 	}
 
 	.logo {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		margin-bottom: 1.75rem;
-	}
-
-	.logo-icon {
-		font-size: 2rem;
-		background: linear-gradient(135deg, #e50914, #b20710);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-	}
-
-	.logo h1 {
-		font-size: 1.6rem;
+		text-align: center;
+		font-size: 2.2rem;
 		font-weight: 700;
-		letter-spacing: -0.02em;
-		line-height: 1.1;
+		letter-spacing: -0.03em;
+		margin-bottom: 1.5rem;
+		color: #e8e8ea;
 	}
 
-	.logo p {
-		font-size: 0.85rem;
-		color: #888;
-		margin-top: 0.2rem;
+	.logo span {
+		color: #e50914;
+	}
+
+	.page.has-results .logo {
+		font-size: 1.4rem;
+		margin-bottom: 1rem;
+		text-align: left;
 	}
 
 	.search-wrap {
 		position: relative;
+		display: flex;
+		align-items: center;
+	}
+
+	.search-icon {
+		position: absolute;
+		left: 1rem;
+		width: 18px;
+		height: 18px;
+		color: #666;
+		pointer-events: none;
+		flex-shrink: 0;
 	}
 
 	.search {
 		width: 100%;
-		padding: 0.875rem 1.25rem;
+		padding: 0.85rem 2.75rem 0.85rem 2.75rem;
 		font-size: 1rem;
 		font-family: inherit;
-		background: #1a1a1f;
-		border: 1.5px solid #2a2a32;
-		border-radius: 12px;
+		background: #1e1e24;
+		border: 1.5px solid #2e2e38;
+		border-radius: 9999px;
 		color: #f0f0f2;
 		outline: none;
-		transition: border-color 0.2s;
+		transition: border-color 0.2s, box-shadow 0.2s;
 	}
 
 	.search:focus {
-		border-color: #e50914;
+		border-color: #444;
+		box-shadow: 0 0 0 3px rgba(255,255,255,0.04);
 	}
 
-	.search::placeholder {
-		color: #555;
-	}
+	.search::placeholder { color: #555; }
+
+	.search::-webkit-search-cancel-button { display: none; }
 
 	.spinner {
 		position: absolute;
-		right: 1rem;
-		top: 50%;
-		transform: translateY(-50%);
-		width: 20px;
-		height: 20px;
+		right: 1.1rem;
+		width: 18px;
+		height: 18px;
 		border: 2px solid #333;
 		border-top-color: #e50914;
 		border-radius: 50%;
 		animation: spin 0.6s linear infinite;
+		flex-shrink: 0;
 	}
 
-	@keyframes spin {
-		to { transform: translateY(-50%) rotate(360deg); }
+	@keyframes spin { to { transform: rotate(360deg); } }
+
+	.results {
+		list-style: none;
+		margin-top: 0.5rem;
+		border: 1px solid #1e1e24;
+		border-radius: 16px;
+		overflow: hidden;
+		background: #111115;
 	}
 
-	.empty-state {
-		text-align: center;
-		padding: 5rem 1rem;
-		color: #666;
+	.results li + li {
+		border-top: 1px solid #1e1e24;
 	}
 
-	.empty-state span {
-		font-size: 3.5rem;
-		display: block;
-		margin-bottom: 1rem;
+	.result-row {
+		width: 100%;
+		display: flex;
+		align-items: center;
+		gap: 0.85rem;
+		padding: 0.7rem 1rem;
+		background: transparent;
+		border: none;
+		color: inherit;
+		cursor: pointer;
+		font-family: inherit;
+		text-align: left;
+		transition: background 0.12s;
 	}
 
-	.empty-state p {
-		font-size: 1rem;
-		max-width: 400px;
-		margin: 0 auto 0.5rem;
+	.result-row:hover {
+		background: #18181e;
 	}
 
-	.empty-state .sub {
-		font-size: 0.82rem;
+	.thumb {
+		width: 40px;
+		height: 60px;
+		object-fit: cover;
+		border-radius: 5px;
+		flex-shrink: 0;
+		background: #1a1a1f;
+	}
+
+	.thumb-empty {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 1.1rem;
+		background: #1a1a1f;
 		color: #444;
 	}
 
-	.grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-		gap: 1rem;
+	.result-text {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
 	}
 
-	@media (min-width: 600px) {
-		.grid {
-			grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
-		}
+	.result-title {
+		font-size: 0.92rem;
+		font-weight: 500;
+		color: #e8e8ea;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.result-meta {
+		font-size: 0.75rem;
+		color: #666;
+	}
+
+	.chevron {
+		width: 16px;
+		height: 16px;
+		color: #444;
+		flex-shrink: 0;
+	}
+
+	.empty {
+		margin-top: 1.5rem;
+		text-align: center;
+		font-size: 0.9rem;
+		color: #555;
 	}
 </style>
