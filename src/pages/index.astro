@@ -1,0 +1,582 @@
+---
+---
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Türkiye'de hangi içerik hangi platformda? Film ve dizileri bulun." />
+  <title>Nerede İzlenir? – Türkiye Streaming Rehberi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #0d0d0f;
+      color: #f0f0f2;
+      min-height: 100vh;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      transition: align-items 0.3s;
+    }
+
+    .page.has-results {
+      align-items: flex-start;
+      padding-top: 4rem;
+    }
+
+    .center-wrap {
+      width: 100%;
+      max-width: 580px;
+    }
+
+    .logo {
+      text-align: center;
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.5rem;
+      color: #e8e8ea;
+      transition: font-size 0.2s, text-align 0.2s;
+    }
+
+    .logo span { color: #e50914; }
+
+    .page.has-results .logo {
+      font-size: 1.4rem;
+      text-align: left;
+      margin-bottom: 1rem;
+    }
+
+    .search-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1rem;
+      width: 18px;
+      height: 18px;
+      color: #666;
+      pointer-events: none;
+    }
+
+    #search {
+      width: 100%;
+      padding: 0.85rem 2.75rem;
+      font-size: 1rem;
+      font-family: inherit;
+      background: #1e1e24;
+      border: 1.5px solid #2e2e38;
+      border-radius: 9999px;
+      color: #f0f0f2;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    #search:focus {
+      border-color: #444;
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.04);
+    }
+
+    #search::placeholder { color: #555; }
+    #search::-webkit-search-cancel-button { display: none; }
+
+    .spinner {
+      position: absolute;
+      right: 1.1rem;
+      width: 18px;
+      height: 18px;
+      border: 2px solid #333;
+      border-top-color: #e50914;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .clear-btn {
+      position: absolute;
+      right: 0.85rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #555;
+      border-radius: 50%;
+      transition: color 0.15s, background 0.15s;
+    }
+
+    .clear-btn:hover { color: #ccc; background: #2a2a33; }
+    .clear-btn svg { width: 16px; height: 16px; }
+
+    #results {
+      list-style: none;
+      margin-top: 0.5rem;
+      border: 1px solid #1e1e24;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #111115;
+    }
+
+    #results li + li { border-top: 1px solid #1e1e24; }
+
+    .result-row {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.7rem 1rem;
+      background: transparent;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      font-family: inherit;
+      text-align: left;
+      transition: background 0.12s;
+    }
+
+    .result-row:hover { background: #18181e; }
+
+    .thumb {
+      width: 40px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 5px;
+      flex-shrink: 0;
+      background: #1a1a1f;
+    }
+
+    .thumb-empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      background: #1a1a1f;
+      color: #444;
+    }
+
+    .result-text {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .result-title {
+      font-size: 0.92rem;
+      font-weight: 500;
+      color: #e8e8ea;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .result-meta { font-size: 0.75rem; color: #666; }
+
+    .chevron { width: 16px; height: 16px; color: #444; flex-shrink: 0; }
+
+    .empty {
+      margin-top: 1.5rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    /* Modal */
+    #overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      backdrop-filter: blur(4px);
+    }
+
+    #overlay.open { display: flex; }
+
+    .modal {
+      background: #16161c;
+      border: 1px solid #2a2a35;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 680px;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      scrollbar-width: thin;
+      scrollbar-color: #333 transparent;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      z-index: 10;
+      background: rgba(0,0,0,0.6);
+      border: none;
+      color: #f0f0f2;
+      font-size: 1rem;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+
+    .modal-close:hover { background: #e50914; }
+
+    .modal-backdrop {
+      height: 180px;
+      background-size: cover;
+      background-position: center top;
+      border-radius: 16px 16px 0 0;
+      mask-image: linear-gradient(to bottom, black 50%, transparent);
+      -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent);
+    }
+
+    .modal-content { padding: 1.5rem; }
+
+    .modal-meta {
+      display: flex;
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .modal-poster {
+      width: 100px;
+      flex-shrink: 0;
+      border-radius: 8px;
+      margin-top: -3rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+
+    .modal-text h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 0.3rem;
+    }
+
+    .modal-year { font-size: 0.8rem; color: #888; margin-bottom: 0.5rem; }
+
+    .modal-overview {
+      font-size: 0.83rem;
+      color: #aaa;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .modal-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 2rem;
+      color: #666;
+    }
+
+    .modal-spinner {
+      width: 28px;
+      height: 28px;
+      border: 3px solid #333;
+      border-top-color: #e50914;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    .no-providers {
+      text-align: center;
+      padding: 2rem;
+      color: #666;
+    }
+
+    .no-providers .emoji { font-size: 2rem; display: block; margin-bottom: 0.75rem; }
+    .no-providers p { font-size: 0.9rem; max-width: 320px; margin: 0 auto; }
+
+    .provider-group { margin-bottom: 1.5rem; }
+
+    .provider-group h3 {
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #888;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid #222;
+    }
+
+    .provider-list { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+
+    .provider {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      width: 72px;
+    }
+
+    .provider img {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      object-fit: cover;
+      border: 1px solid #2a2a35;
+    }
+
+    .provider span {
+      font-size: 0.65rem;
+      color: #aaa;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    @media (max-width: 480px) {
+      .modal-meta { flex-direction: column; }
+      .modal-poster { width: 80px; margin-top: -2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page" id="page">
+  <div class="center-wrap">
+    <h1 class="logo" id="logo">nerede<span>izlenir</span></h1>
+
+    <div class="search-wrap">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input
+        id="search"
+        type="search"
+        placeholder="Film veya dizi ara…"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <span class="spinner" id="spinner" style="display:none"></span>
+      <button class="clear-btn" id="clear-btn" style="display:none" aria-label="Temizle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M18 6 6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <ul id="results"></ul>
+    <p class="empty" id="empty" style="display:none"></p>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="overlay">
+  <div class="modal" id="modal" role="dialog" aria-modal="true">
+    <button class="modal-close" id="modal-close" aria-label="Kapat">✕</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+  const IMG_W92  = 'https://image.tmdb.org/t/p/w92';
+  const IMG_W342 = 'https://image.tmdb.org/t/p/w342';
+  const IMG_ORIG = 'https://image.tmdb.org/t/p/original';
+
+  const page      = document.getElementById('page');
+  const searchEl  = document.getElementById('search');
+  const spinner   = document.getElementById('spinner');
+  const clearBtn  = document.getElementById('clear-btn');
+  const resultsList = document.getElementById('results');
+  const emptyEl   = document.getElementById('empty');
+  const overlay   = document.getElementById('overlay');
+  const modalBody = document.getElementById('modal-body');
+  const modalClose = document.getElementById('modal-close');
+
+  let debounceTimer;
+
+  function setLoading(on) {
+    spinner.style.display = on ? 'block' : 'none';
+    if (!on) updateClearBtn();
+  }
+
+  function updateClearBtn() {
+    clearBtn.style.display = searchEl.value ? 'flex' : 'none';
+  }
+
+  searchEl.addEventListener('input', () => {
+    updateClearBtn();
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => doSearch(searchEl.value), 350);
+  });
+
+  clearBtn.addEventListener('click', () => {
+    searchEl.value = '';
+    clearBtn.style.display = 'none';
+    resultsList.innerHTML = '';
+    emptyEl.style.display = 'none';
+    page.classList.remove('has-results');
+    searchEl.focus();
+  });
+
+  async function doSearch(q) {
+    if (!q.trim()) {
+      resultsList.innerHTML = '';
+      emptyEl.style.display = 'none';
+      page.classList.remove('has-results');
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+      const data = await res.json();
+      renderResults(data.results, q);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function renderResults(results, q) {
+    resultsList.innerHTML = '';
+    page.classList.toggle('has-results', true);
+
+    if (!results.length) {
+      emptyEl.textContent = `"${q}" için sonuç bulunamadı.`;
+      emptyEl.style.display = 'block';
+      return;
+    }
+
+    emptyEl.style.display = 'none';
+
+    results.forEach(item => {
+      const title = item.title ?? item.name ?? '';
+      const year  = (item.release_date ?? item.first_air_date ?? '').slice(0, 4);
+      const type  = item.media_type === 'movie' ? 'Film' : 'Dizi';
+      const poster = item.poster_path ? IMG_W92 + item.poster_path : null;
+
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <button class="result-row" type="button">
+          ${poster
+            ? `<img class="thumb" src="${poster}" alt="" loading="lazy" />`
+            : `<div class="thumb thumb-empty">🎬</div>`}
+          <div class="result-text">
+            <span class="result-title">${escHtml(title)}</span>
+            <span class="result-meta">${year ? year + ' · ' : ''}${type}</span>
+          </div>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m9 18 6-6-6-6"/>
+          </svg>
+        </button>`;
+      li.querySelector('button').addEventListener('click', () => openModal(item));
+      resultsList.appendChild(li);
+    });
+  }
+
+  async function openModal(item) {
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+    const title   = item.title ?? item.name ?? '';
+    const year    = (item.release_date ?? item.first_air_date ?? '').slice(0, 4);
+    const type    = item.media_type === 'movie' ? 'Film' : 'Dizi';
+    const poster  = item.poster_path ? IMG_W342 + item.poster_path : null;
+
+    modalBody.innerHTML = `
+      ${poster ? `<div class="modal-backdrop" style="background-image:url('${IMG_ORIG}${item.backdrop_path || item.poster_path}')"></div>` : ''}
+      <div class="modal-content">
+        <div class="modal-meta">
+          ${poster ? `<img class="modal-poster" src="${poster}" alt="${escHtml(title)}" />` : ''}
+          <div class="modal-text">
+            <h2>${escHtml(title)}</h2>
+            <p class="modal-year">${year ? year + ' · ' : ''}${type}</p>
+          </div>
+        </div>
+        <div class="modal-loading" id="modal-providers-loading">
+          <div class="modal-spinner"></div>
+          <p>Platform bilgisi yükleniyor…</p>
+        </div>
+        <div id="modal-providers"></div>
+      </div>`;
+
+    const res = await fetch(`/api/providers?id=${item.id}&type=${item.media_type}`);
+    const data = await res.json();
+
+    document.getElementById('modal-providers-loading').remove();
+
+    const overview = data.detail?.overview || item.overview || '';
+    if (overview) {
+      document.querySelector('.modal-text').insertAdjacentHTML(
+        'beforeend',
+        `<p class="modal-overview">${escHtml(overview)}</p>`
+      );
+    }
+
+    renderProviders(data.tr, document.getElementById('modal-providers'));
+  }
+
+  const SECTIONS = [
+    { key: 'flatrate', label: 'Abonelik (Streaming)' },
+    { key: 'rent',     label: 'Kiralık' },
+    { key: 'buy',      label: 'Satın Al' },
+    { key: 'free',     label: 'Ücretsiz' },
+    { key: 'ads',      label: 'Reklamsız Ücretsiz' }
+  ];
+
+  function renderProviders(tr, container) {
+    if (!tr) {
+      container.innerHTML = `<div class="no-providers"><span class="emoji">😔</span><p>Bu içerik şu an Türkiye'de hiçbir platformda mevcut değil.</p></div>`;
+      return;
+    }
+    let html = '';
+    SECTIONS.forEach(({ key, label }) => {
+      if (tr[key]?.length) {
+        html += `<div class="provider-group"><h3>${label}</h3><div class="provider-list">`;
+        tr[key].forEach(p => {
+          html += `<div class="provider"><img src="${IMG_ORIG}${p.logo_path}" alt="${escHtml(p.provider_name)}" loading="lazy" /><span>${escHtml(p.provider_name)}</span></div>`;
+        });
+        html += '</div></div>';
+      }
+    });
+    container.innerHTML = html || `<div class="no-providers"><span class="emoji">😔</span><p>Bu içerik şu an Türkiye'de hiçbir platformda mevcut değil.</p></div>`;
+  }
+
+  function closeModal() {
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+    modalBody.innerHTML = '';
+  }
+
+  modalClose.addEventListener('click', closeModal);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+</script>
+
+</body>
+</html>
